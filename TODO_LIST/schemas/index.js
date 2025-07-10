@@ -9,7 +9,7 @@ const connect = () => {
       'mongodb+srv://ygm:sdsd0615@cluster0.kyecccq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
       {
         dbName: 'todo_memo', // todo_memo 데이터베이스명을 사용합니다.
-      },
+      }
     )
     .then(() => console.log('MongoDB 연결에 성공하였습니다.'))
     .catch((err) => console.log(`MongoDB 연결에 실패하였습니다. ${err}`));

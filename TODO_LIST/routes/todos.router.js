@@ -6,13 +6,11 @@ import Todo from '../schemas/todo.schema.js';
 
 const router = express.Router();
 
-
 const createdTodoSchema = joi.object({
   value: joi.string().min(1).max(50).required(),
 });
 
-
-router.post('/todos', async (req, res) => {
+router.post('/todos', async (req, res, next) => {
   try {
     // 클라이언트에게 전달받은 value 데이터를 변수에 저장합니다.
     // const { value } = req.body;
@@ -42,15 +40,9 @@ router.post('/todos', async (req, res) => {
 
     return res.status(201).json({ todo });
   } catch (error) {
-    console.error(error);
-    if(error.name === 'ValidationError'){
-      return res.status(400).json({errorMessage: error.message});
-    }
-
+    //Router 다음에 있는 에러 처리 미들웨어를 실행한다.
+    next(error);
   }
-
-  return res.status(500).json({errorMessage:'서버에서 에러가 발생했습니다.'});
-
 });
 
 router.get('/todos', async (req, res) => {
@@ -110,14 +102,14 @@ router.delete('/todos/:todoId', async (req, res) => {
   const todo = await Todo.findById(todoId).exec();
 
   if (!todo) {
-    return res.status(404).json({ errorMessage: '존재하지 않는 해야할 일 정보입니다.' });
+    return res
+      .status(404)
+      .json({ errorMessage: '존재하지 않는 해야할 일 정보입니다.' });
   }
 
   await Todo.deleteOne({ _id: todoId });
 
   return res.status(200).json({});
 });
-
-
 
 export default router;
