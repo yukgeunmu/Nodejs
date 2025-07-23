@@ -77,14 +77,19 @@ router.post("/sign-in", async (req, res, next) => {
   if (!(await bcrpyt.compare(password, user.password)))
     return res.status(401).json({ message: "비밀번호가 일치하지 않습니다." });
 
-  const token = jwt.sign(
-    {
-      userId: user.userId,
-    },
-    "custom-secret-key"
-  );
+  // 이전 jwt 방식으로 세션 생성 코드
+  // const token = jwt.sign(
+  //   {
+  //     userId: user.userId,
+  //   },
+  //   "custom-secret-key"
+  // );
 
-  res.cookie("authorization", `Bearer ${token}`);
+  // res.cookie("authorization", `Bearer ${token}`);
+
+    // 로그인에 성공하면, 사용자의 userId를 바탕으로 세션을 생성합니다.
+    req.session.userId = user.userId;
+
   return res.status(200).json({ message: "로그인 성공" });
 });
 
