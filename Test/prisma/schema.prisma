@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Items {
+  itemId        Int             @id @default(autoincrement()) @map("itemId")
+  itemName      String          @map("name")
+  itemStat      Json?           @map("itemStat")
+  itemPrice     Int             @map("itemPrice")
+  createdAt     DateTime        @default(now()) @map("createdAt")
+  updatedAt     DateTime        @updatedAt @map("updatedAt")
+  isEquip       Boolean         @default(true) @map("isEquip")
+  itemType      ItemType        @default(WEAPON) @map("itemType")
+  equippedItems EquippedItem[]
+  inventories   InventoryItem[]
+
+  @@map("Items")
+}
+
+model Account {
+  accountId    Int         @id @default(autoincrement()) @map("accountId")
+  userId       String      @unique @map("userId")
+  password     String      @map("password")
+  name         String      @map("name")
+  createdAt    DateTime    @default(now()) @map("createdAt")
+  updatedAt    DateTime    @updatedAt @map("updatedAt")
+  refreshToken String?     @map("refreshToken")
+  character    Character[]
+
+  @@map("Account")
+}
+
+model Character {
+  characterId   Int             @id @default(autoincrement()) @map("characterId")
+  accountId     Int             @map("accountId")
+  charactername String          @unique @map("charactername")
+  health        Int             @map("health")
+  power         Int             @map("power")
+  money         Int             @map("money")
+  profileImage  String?         @map("profileImage")
+  createdAt     DateTime        @default(now()) @map("createdAt")
+  updatedAt     DateTime        @updatedAt @map("updatedAt")
+  account       Account         @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
+  equippedItem  EquippedItem[]
+  inventoryIem  InventoryItem[]
+
+  @@index([accountId], map: "Character_accountId_fkey")
+  @@map("Character")
+}
+
+model InventoryItem {
+  inventoryItemId Int       @id @default(autoincrement()) @map("inventoryItemId")
+  characterId     Int       @map("characterId")
+  itemId          Int       @map("itemId")
+  quantity        Int       @default(1) @map("quantity")
+  character       Character @relation(fields: [characterId], references: [characterId], onDelete: Cascade)
+  item            Items     @relation(fields: [itemId], references: [itemId], onDelete: Cascade)
+
+  @@unique([characterId, itemId])
+  @@index([itemId], map: "InventoryItem_itemId_fkey")
+  @@map("InventoryItem")
+}
+
+model EquippedItem {
+  equippedItemId Int       @id @default(autoincrement()) @map("equippedItemId")
+  characterId    Int       @map("characterId")
+  itemId         Int       @map("itemId")
+  slot           ItemType  @map("slot")
+  character      Character @relation(fields: [characterId], references: [characterId], onDelete: Cascade)
+  item           Items     @relation(fields: [itemId], references: [itemId], onDelete: Cascade)
+
+  @@unique([characterId, slot])
+  @@index([itemId], map: "EquippedItem_itemId_fkey")
+  @@map("EquippedItem")
+}
+
+enum ItemType {
+  HEAD
+  BODY
+  WEAPON
+  SHIELD
+  RING
+  NECKLACE
+  CONSUMABLE
+}
